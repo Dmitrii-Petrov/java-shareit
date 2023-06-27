@@ -35,7 +35,6 @@ public class UserController {
     public User getUsersById(@PathVariable(required = false) @NotNull Long userId) {
         log.info("поулчен запрос GET /users/id");
         return userService.getUsersById(userId);
-
     }
 
 
@@ -56,6 +55,4 @@ public class UserController {
         log.debug("поулчен запрос DELETE /users");
         userService.delete(userId);
     }
-
-
 }

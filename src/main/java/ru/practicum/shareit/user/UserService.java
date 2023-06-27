@@ -18,7 +18,6 @@ public class UserService {
 
     UserStorage userStorage;
 
-
     @Autowired
     public UserService(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
@@ -55,5 +54,4 @@ public class UserService {
     public void delete(Long id) {
         getUserStorage().delete(id);
     }
-
 }

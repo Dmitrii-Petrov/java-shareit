@@ -6,6 +6,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class ItemRequestDto {
+
     private Long id;
 
     @Size(max = 200, message = "максимальная длина описания - 200 символов")

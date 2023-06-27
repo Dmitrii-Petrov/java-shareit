@@ -18,7 +18,6 @@ import java.util.List;
 @Validated
 public class ItemController {
 
-
     ItemService itemService;
 
     @Autowired

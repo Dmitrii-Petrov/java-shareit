@@ -5,6 +5,7 @@ import ru.practicum.shareit.request.ItemRequest;
 import java.util.List;
 
 public interface ItemRequestStorage {
+
     void save(ItemRequest request);
 
     void update(ItemRequest request);

@@ -80,6 +80,4 @@ public class InMemoryUserStorage implements UserStorage {
     public List<Long> getUsersId() {
         return new ArrayList<>(userRepository.keySet());
     }
-
-
 }
