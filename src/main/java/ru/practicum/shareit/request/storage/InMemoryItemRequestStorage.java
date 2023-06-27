@@ -9,7 +9,9 @@ import java.util.List;
 
 public class InMemoryItemRequestStorage implements ItemRequestStorage {
     HashMap<Long, ItemRequest> requestRepository = new HashMap<>();
+
     long generatorId = 0;
+
     public long generateId() {
         return ++generatorId;
     }

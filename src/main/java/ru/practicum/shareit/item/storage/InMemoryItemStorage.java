@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 @Data
 @Component("inMemoryItemStorage")
 public class InMemoryItemStorage implements ItemStorage {
+
     HashMap<Long, Item> itemRepository = new HashMap<>();
+
     long generatorId = 0;
 
     public long generateId() {
@@ -70,13 +71,10 @@ public class InMemoryItemStorage implements ItemStorage {
             }
         }
         return list;
-
     }
 
     public List<Item> getItems() {
         return new ArrayList<>(itemRepository.values());
-
     }
-
 
 }
