@@ -2,7 +2,7 @@ package ru.practicum.shareit.user.storage;
 
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface UserStorage {
     void save(User user);
@@ -13,5 +13,7 @@ public interface UserStorage {
 
     User getUser(Long id);
 
-    ArrayList<User> getUsers();
+    List<User> getUsers();
+
+    List<Long> getUsersId();
 }

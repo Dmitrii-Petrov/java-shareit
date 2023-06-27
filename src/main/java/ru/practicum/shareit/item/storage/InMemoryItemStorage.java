@@ -2,8 +2,8 @@ package ru.practicum.shareit.item.storage;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exceptions.NotFoundEntityException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.storage.ItemRequestNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class InMemoryItemStorage implements ItemStorage {
     public void update(Long id, Item item, Long userId) {
 
         if (!itemRepository.containsKey(id)) {
-            throw new ItemRequestNotFoundException();
+            throw new NotFoundEntityException();
         }
 
         if (item.getName() != null) {
@@ -47,7 +47,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public void delete(Long id) {
         if (!itemRepository.containsKey(id)) {
-            throw new ItemNotFoundException();
+            throw new NotFoundEntityException();
         }
         itemRepository.remove(id);
     }
@@ -56,7 +56,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item getItem(Long id) {
         if (!itemRepository.containsKey(id)) {
-            throw new ItemNotFoundException();
+            throw new NotFoundEntityException();
         }
         return itemRepository.get(id);
     }

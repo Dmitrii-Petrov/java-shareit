@@ -4,12 +4,11 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NotFoundEntityException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemNotFoundException;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.user.storage.UserNotFoundException;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +21,13 @@ import static ru.practicum.shareit.item.model.ItemMapper.dtoToItem;
 public class ItemService {
 
     ItemStorage itemStorage;
-    UserStorage userStorage;
+    UserService userService;
 
 
     @Autowired
-    public ItemService(@Qualifier("inMemoryItemStorage") ItemStorage itemStorage, UserStorage userStorage) {
+    public ItemService(@Qualifier("inMemoryItemStorage") ItemStorage itemStorage, UserService userService) {
         this.itemStorage = itemStorage;
-        this.userStorage = userStorage;
-
+        this.userService = userService;
     }
 
     public ItemStorage getItemStorage() {
@@ -46,10 +44,9 @@ public class ItemService {
     }
 
     public Item create(ItemDto itemDto, Long userId) {
-        if (!userStorage.getUsers().contains(userStorage.getUser(userId))) {
-            throw new UserNotFoundException();
+        if (!userService.getUserStorage().getUsersId().contains(userId)) {
+            throw new NotFoundEntityException();
         }
-
         Item item = dtoToItem(null, itemDto, userId);
         getItemStorage().save(item);
         return item;
@@ -57,7 +54,7 @@ public class ItemService {
 
     public Item update(Long id, ItemDto itemDto, Long userId) {
         if (!Objects.equals(itemStorage.getItem(id).getOwner(), userId)) {
-            throw new ItemNotFoundException();
+            throw new NotFoundEntityException();
         }
         Item item = dtoToItem(id, itemDto, userId);
         getItemStorage().update(id, item, userId);

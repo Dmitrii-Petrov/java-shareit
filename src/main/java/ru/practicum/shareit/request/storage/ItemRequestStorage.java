@@ -2,7 +2,7 @@ package ru.practicum.shareit.request.storage;
 
 import ru.practicum.shareit.request.ItemRequest;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public interface ItemRequestStorage {
     void save(ItemRequest request);
@@ -13,5 +13,5 @@ public interface ItemRequestStorage {
 
     ItemRequest getItemRequest(Long id);
 
-    ArrayList<ItemRequest> getItemRequests();
+    List<ItemRequest> getItemRequests();
 }

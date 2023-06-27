@@ -11,18 +11,18 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequest() != null ? item.getRequest() : null
+                item.getRequest()
         );
     }
 
     public static Item dtoToItem(Long id, ItemDto itemDto, Long userId) {
         return new Item(
                 id,
-                itemDto.getName() != null ? itemDto.getName() : null,
-                itemDto.getDescription() != null ? itemDto.getDescription() : null,
-                itemDto.getAvailable() != null ? itemDto.getAvailable() : null,
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable(),
                 userId,
-                itemDto.getRequest() != null ? itemDto.getRequest() : null
+                itemDto.getRequest()
         );
     }
 }

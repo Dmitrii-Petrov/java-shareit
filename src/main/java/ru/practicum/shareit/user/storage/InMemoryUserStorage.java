@@ -2,11 +2,14 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exceptions.EmailAlreadyTakenException;
+import ru.practicum.shareit.exceptions.NotFoundEntityException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 @Data
 @Component("inMemoryUserStorage")
@@ -34,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
     public void update(Long id, User user) {
 
         if (!userRepository.containsKey(id)) {
-            throw new UserNotFoundException();
+            throw new NotFoundEntityException();
         }
         if (user.getEmail() != null) {
             if ((emails.contains(user.getEmail())) && !(userRepository.get(id).getEmail().equals(user.getEmail()))) {
@@ -53,7 +56,7 @@ public class InMemoryUserStorage implements UserStorage {
     public void delete(Long id) {
 
         if (!userRepository.containsKey(id)) {
-            throw new UserNotFoundException();
+            throw new NotFoundEntityException();
         }
         emails.remove(userRepository.get(id).getEmail());
         userRepository.remove(id);
@@ -63,14 +66,19 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUser(Long id) {
         if (!userRepository.containsKey(id)) {
-            throw new UserNotFoundException();
+            throw new NotFoundEntityException();
         }
         return userRepository.get(id);
     }
 
     @Override
-    public ArrayList<User> getUsers() {
+    public List<User> getUsers() {
         return new ArrayList<>(userRepository.values());
+    }
+
+    @Override
+    public List<Long> getUsersId() {
+        return new ArrayList<>(userRepository.keySet());
     }
 
 

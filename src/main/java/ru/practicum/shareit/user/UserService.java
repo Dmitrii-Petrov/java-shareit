@@ -32,11 +32,16 @@ public class UserService {
         return getUserStorage().getUsers();
     }
 
+    public List<Long> getUsersId() {
+        return getUserStorage().getUsersId();
+    }
+
     public User getUsersById(Long userId) {
         return getUserStorage().getUser(userId);
     }
 
-    public User create(User user) {
+    public User create(UserDto userDto) {
+        User user = dtoToUser(null, userDto);
         getUserStorage().save(user);
         return user;
     }

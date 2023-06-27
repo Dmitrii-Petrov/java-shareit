@@ -40,9 +40,9 @@ public class UserController {
 
 
     @PostMapping()
-    public User create(@RequestBody @Valid User user) {
+    public User create(@RequestBody @Valid UserDto userDto) {
         log.info("поулчен запрос POST /users");
-        return userService.create(user);
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{userId}")
