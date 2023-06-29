@@ -34,6 +34,10 @@ public class ItemService {
         return itemRepository.findByOwner(userId);
     }
 
+    public Boolean findUserById(Long userId) {
+        return userService.findUserById(userId);
+    }
+
     public Optional<Item> getItemById(Long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new NotFoundEntityException();

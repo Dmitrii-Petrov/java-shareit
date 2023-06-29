@@ -1,9 +1,11 @@
 package ru.practicum.shareit.item.model;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 @Component
+@AllArgsConstructor
 public class ItemMapper {
 
 //    public static ItemDto itemToDto(Item item) {
