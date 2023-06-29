@@ -16,7 +16,7 @@ public class ItemRequest {
     @Size(max = 200, message = "максимальная длина описания - 200 символов")
     private String description;
 
-    private User requestor;
+    private User requester;
 
     private LocalDateTime created;
 }

@@ -10,6 +10,7 @@ import ru.practicum.shareit.item.model.Item;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -32,7 +33,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public Item getItemById(@PathVariable(required = false) @NotNull Long itemId) {
+    public Optional<Item> getItemById(@PathVariable(required = false) @NotNull Long itemId) {
         log.info("поулчен запрос GET /items/id");
         return itemService.getItemById(itemId);
     }
