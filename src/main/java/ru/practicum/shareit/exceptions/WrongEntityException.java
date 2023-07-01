@@ -8,7 +8,6 @@ public class WrongEntityException extends RuntimeException {
     public WrongEntityException(String s) {
         super(s);
     }
-
     public WrongEntityException() {
     }
 }

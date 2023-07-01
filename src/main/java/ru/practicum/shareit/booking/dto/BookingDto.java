@@ -31,7 +31,7 @@ public class BookingDto {
 
     private Item item;
 
-    private User user;
+    private User booker;
     @Enumerated(EnumType.STRING)
     private Status status;
 }

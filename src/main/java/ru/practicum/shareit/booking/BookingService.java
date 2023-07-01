@@ -21,14 +21,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static ru.practicum.shareit.booking.model.BookingMapper.mapToNewBooking;
-import static ru.practicum.shareit.item.model.ItemMapper.mapToNewItem;
 
 @Service("bookingService")
 @RequiredArgsConstructor
 public class BookingService {
 
     BookingRepository bookingRepository;
-
     ItemService itemService;
     UserService userService;
 
@@ -39,15 +37,6 @@ public class BookingService {
         this.itemService = itemService;
         this.userService = userService;
     }
-
-//    @Autowired
-//    public UserService(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
-
-//    public UserStorage getUserStorage() {
-//        return userStorage;
-//    }
 
     public List<Booking> getBookings() {
         return bookingRepository.findAll();
@@ -65,7 +54,7 @@ public class BookingService {
     }
 
     public Booking saveBooking(BookingDto bookingDto, Long id) {
-        Item item = mapToNewItem(itemService.getItemById(bookingDto.getItemId()), bookingDto.getItemId());
+        Item item = itemService.getItemById(bookingDto.getItemId());
         User user = userService.getUsersById(id).get();
         Booking booking = mapToNewBooking(bookingDto, user, item);
 
@@ -81,12 +70,6 @@ public class BookingService {
         bookingRepository.save(booking);
         return booking;
     }
-
-//    public Item updateLastAndNextBooker(Item item) {
-//        item.setNextBooking(bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(item.getOwner(), LocalDateTime.now()).get(0));
-//        item.setLastBooking(bookingRepository.findByItemIdAndEndBeforeOrderByStartAsc(item.getOwner(), LocalDateTime.now()));
-//        return item;
-//    }
 
     public Booking getBookingById(Long bookingId, Long userId) {
         if ((!bookingRepository.existsById(bookingId)) || (!itemService.findUserById(userId))) {
@@ -155,7 +138,6 @@ public class BookingService {
         }
     }
 
-
     public Booking approve(Long bookingId, Long userId, Boolean bool) {
         if ((!userService.findUserById(userId)) || (!bookingRepository.existsById(bookingId)) || (!Objects.equals(bookingRepository.findById(bookingId).get().getItem().getOwner(), userId))) {
             throw new NotFoundEntityException();
@@ -169,20 +151,4 @@ public class BookingService {
         } else booking.setStatus(Status.REJECTED);
         return bookingRepository.save(booking);
     }
-//    public User updateUser(Long id, UserDto userDto) {
-//        if (!userRepository.existsById(id)) {
-//            throw new NotFoundEntityException();
-//        }
-//        User user = userRepository.findById(id).get();
-//        return userRepository.save(new User(
-//                id,
-//                userDto.getName() != null ? userDto.getName() : user.getName(),
-//                userDto.getEmail() != null ? userDto.getEmail() : user.getEmail()
-//        ));
-//    }
-
-//    public void delete(Long userId) {
-//        userRepository.delete(userRepository.findById(userId).get());
-//    }
-
 }

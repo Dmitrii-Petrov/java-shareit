@@ -8,6 +8,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -23,27 +25,17 @@ public class ItemDto {
     @Size(max = 200, message = "максимальная длина описания - 200 символов")
     @NotBlank
     private String description;
+
     @NotNull
     private Boolean available;
 
-
     private Long owner;
 
-
     private Long request;
-
 
     private Booking lastBooking;
 
     private Booking nextBooking;
 
-
-//    public ItemDto(String name, String description, Boolean available, Long request) {
-//        this.name = name;
-//        this.description = description;
-//        this.available = available;
-//        this.request = request;
-//    }
-
-
+    private List<CommentDto> comments = new ArrayList<>();
 }

@@ -3,10 +3,16 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundEntityException;
+import ru.practicum.shareit.exceptions.WrongEntityException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.UserService;
 
@@ -15,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static ru.practicum.shareit.item.model.CommentMapper.commentToDto;
+import static ru.practicum.shareit.item.model.CommentMapper.mapToNewComment;
 import static ru.practicum.shareit.item.model.ItemMapper.itemToDto;
 import static ru.practicum.shareit.item.model.ItemMapper.mapToNewItem;
 
@@ -27,35 +35,63 @@ public class ItemService {
 
     BookingRepository bookingRepository;
 
+    CommentRepository commentRepository;
+
 
     @Autowired
-    public ItemService(UserService userService, ItemRepository itemRepository, BookingRepository bookingRepository) {
+    public ItemService(UserService userService, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.userService = userService;
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
-    public List<Item> getItemsByUserId(Long userId) {
-
-        return itemRepository.findByOwner(userId);
+    public List<ItemDto> getItemsByUserId(Long userId) {
+        List<Item> list = itemRepository.findByOwnerOrderById(userId);
+        List<ItemDto> result = new ArrayList<>();
+        for (Item item : list) {
+            ItemDto itemDto = itemToDto(item);
+            if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
+            }
+            if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
+            }
+            result.add(itemDto);
+        }
+        return result;
     }
 
     public Boolean findUserById(Long userId) {
         return userService.findUserById(userId);
     }
 
-    public ItemDto getItemById(Long itemId) {
+    public Item getItemById(Long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new NotFoundEntityException();
         }
-        ItemDto itemDto = itemToDto(itemRepository.findById(itemId).get());
-        if (!bookingRepository.findByItemIdAndStartAfterOrderByStartDesc(itemId, LocalDateTime.now()).isEmpty()) {
-            itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterOrderByStartDesc(itemId, LocalDateTime.now()).get(0));
-        }
-        if (!bookingRepository.findByItemIdAndEndBeforeOrderByEndAsc(itemId, LocalDateTime.now()).isEmpty()) {
-            itemDto.setLastBooking(bookingRepository.findByItemIdAndEndBeforeOrderByEndAsc(itemId, LocalDateTime.now()).get(0));
-        }
+        return itemRepository.findById(itemId).get();
+    }
 
+    public ItemDto getItemDtoByItemId(Long itemId, Long userId) {
+        Item item = getItemById(itemId);
+        ItemDto itemDto = itemToDto(item);
+        if (item.getOwner().equals(userId)) {
+            if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), Status.APPROVED).get(0));
+            }
+            if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(itemId, LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(itemId, LocalDateTime.now(), Status.APPROVED).get(0));
+            }
+        }
+        if (commentRepository.findByItem_IdOrderByCreatedDesc(itemId) != null) {
+            List<Comment> list = (commentRepository.findByItem_IdOrderByCreatedDesc(itemId));
+            List<CommentDto> commentDtoList = new ArrayList<>();
+            for (Comment comment : list) {
+                commentDtoList.add(commentToDto(comment));
+            }
+            itemDto.setComments(commentDtoList);
+        }
         return itemDto;
     }
 
@@ -98,5 +134,27 @@ public class ItemService {
             }
         }
         return list;
+    }
+
+    public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {
+        if (!itemRepository.existsById(itemId)) {
+            throw new NotFoundEntityException();
+        }
+        if (!userService.findUserById(userId)) {
+            throw new NotFoundEntityException();
+        }
+        List<Booking> list = bookingRepository.findByBookerIdAndStatusAndEndBeforeOrderByIdDesc(userId, Status.APPROVED, LocalDateTime.now());
+        boolean bool = false;
+        for (Booking booking : list) {
+            if (booking.getItem().getId().equals(itemId)) {
+                bool = true;
+                break;
+            }
+        }
+        if (bool) {
+            Comment comment = mapToNewComment(commentDto, userService.getUsersById(userId).get(), itemRepository.findById(itemId).get());
+            return commentToDto(commentRepository.save(comment));
+        } else throw new WrongEntityException();
+
     }
 }

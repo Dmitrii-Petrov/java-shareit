@@ -15,7 +15,6 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleUnknownState(UnknownStateException e) {
         return Map.of("error", e.getMessage());
-//                new ResponseEntity<>(new UnknownStateError(HttpStatus.BAD_REQUEST.value(), "Unknown state: UNSUPPORTED_STATUS"), HttpStatus.BAD_REQUEST);
     }
 
 }

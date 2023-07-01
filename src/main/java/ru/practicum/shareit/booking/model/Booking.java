@@ -25,18 +25,15 @@ public class Booking {
     @Column(name = "end_date")
     private LocalDateTime end;
 
-//    private Long itemId;
-//
-//    private Long bookerId;
-
     @ManyToOne
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "item")
     private Item item;
 
     @ManyToOne
-    @JoinColumn(name = "booker_id")
+    @JoinColumn(name = "booker")
     private User booker;
 
+    private Long bookerId;
 
     private Status status;
 }

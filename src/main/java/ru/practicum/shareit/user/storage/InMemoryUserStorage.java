@@ -15,7 +15,6 @@ import java.util.List;
 @Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
     HashMap<Long, User> userRepository = new HashMap<>();
-
     HashSet<String> emails = new HashSet<>();
     long generatorId = 0;
 
@@ -54,7 +53,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void delete(Long id) {
-
         if (!userRepository.containsKey(id)) {
             throw new NotFoundEntityException();
         }
