@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundEntityException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -14,18 +15,22 @@ import static ru.practicum.shareit.user.model.UserMapper.mapToNewUser;
 
 @Service("userService")
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Boolean findUserById(Long userId) {
         return userRepository.existsById(userId);
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> getUsersById(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundEntityException();

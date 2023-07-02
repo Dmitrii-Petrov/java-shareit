@@ -1,8 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
@@ -24,28 +24,24 @@ import static ru.practicum.shareit.booking.model.BookingMapper.mapToNewBooking;
 
 @Service("bookingService")
 @RequiredArgsConstructor
+@Transactional
 public class BookingService {
 
-    BookingRepository bookingRepository;
-    ItemService itemService;
-    UserService userService;
+    private final BookingRepository bookingRepository;
+    private final ItemService itemService;
+    private final UserService userService;
 
-
-    @Autowired
-    public BookingService(BookingRepository bookingRepository, ItemService itemService, UserService userService) {
-        this.bookingRepository = bookingRepository;
-        this.itemService = itemService;
-        this.userService = userService;
-    }
-
+    @Transactional(readOnly = true)
     public List<Booking> getBookings() {
         return bookingRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Boolean findBookingById(Long bookingId) {
         return bookingRepository.existsById(bookingId);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Booking> getBookingsById(Long bookingsId) {
         if (!bookingRepository.existsById(bookingsId)) {
             throw new NotFoundEntityException();
@@ -71,6 +67,7 @@ public class BookingService {
         return booking;
     }
 
+    @Transactional(readOnly = true)
     public Booking getBookingById(Long bookingId, Long userId) {
         if ((!bookingRepository.existsById(bookingId)) || (!itemService.findUserById(userId))) {
             throw new NotFoundEntityException();
@@ -82,6 +79,7 @@ public class BookingService {
         return booking;
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookings(Long userId, String state) {
         if (!itemService.findUserById(userId)) {
             throw new NotFoundEntityException();
@@ -110,6 +108,7 @@ public class BookingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Booking> getBookingsByOwner(Long userId, String state) {
         if (!itemService.findUserById(userId)) {
             throw new NotFoundEntityException();

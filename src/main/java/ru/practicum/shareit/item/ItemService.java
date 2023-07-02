@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
@@ -28,24 +28,17 @@ import static ru.practicum.shareit.item.model.ItemMapper.mapToNewItem;
 
 @Service("itemService")
 @RequiredArgsConstructor
+@Transactional
 public class ItemService {
 
-    ItemRepository itemRepository;
-    UserService userService;
+    private final ItemRepository itemRepository;
+    private final UserService userService;
 
-    BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
-    CommentRepository commentRepository;
+    private final CommentRepository commentRepository;
 
-
-    @Autowired
-    public ItemService(UserService userService, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
-        this.userService = userService;
-        this.itemRepository = itemRepository;
-        this.bookingRepository = bookingRepository;
-        this.commentRepository = commentRepository;
-    }
-
+    @Transactional(readOnly = true)
     public List<ItemDto> getItemsByUserId(Long userId) {
         List<Item> list = itemRepository.findByOwnerOrderById(userId);
         List<ItemDto> result = new ArrayList<>();
@@ -62,10 +55,12 @@ public class ItemService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public Boolean findUserById(Long userId) {
         return userService.findUserById(userId);
     }
 
+    @Transactional(readOnly = true)
     public Item getItemById(Long itemId) {
         if (!itemRepository.existsById(itemId)) {
             throw new NotFoundEntityException();
@@ -73,6 +68,7 @@ public class ItemService {
         return itemRepository.findById(itemId).get();
     }
 
+    @Transactional(readOnly = true)
     public ItemDto getItemDtoByItemId(Long itemId, Long userId) {
         Item item = getItemById(itemId);
         ItemDto itemDto = itemToDto(item);
@@ -123,6 +119,7 @@ public class ItemService {
         itemRepository.delete(itemRepository.findById(id).get());
     }
 
+    @Transactional(readOnly = true)
     public List<Item> getItemsByTextSearch(String text) {
         List<Item> list = new ArrayList<>();
         if (text.isBlank()) {
