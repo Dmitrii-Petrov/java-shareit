@@ -1,57 +1,62 @@
 package ru.practicum.shareit.user;
 
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exceptions.NotFoundEntityException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
-import static ru.practicum.shareit.user.model.UserMapper.dtoToUser;
+import static ru.practicum.shareit.user.model.UserMapper.mapToNewUser;
 
 @Service("userService")
-@Data
+@RequiredArgsConstructor
+@Transactional
 public class UserService {
 
-    UserStorage userStorage;
+    private final UserRepository userRepository;
 
-    @Autowired
-    public UserService(@Qualifier("inMemoryUserStorage") UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
-
-    public UserStorage getUserStorage() {
-        return userStorage;
-    }
-
+    @Transactional(readOnly = true)
     public List<User> getUsers() {
-        return getUserStorage().getUsers();
+        return userRepository.findAll();
     }
 
-    public List<Long> getUsersId() {
-        return getUserStorage().getUsersId();
+    @Transactional(readOnly = true)
+    public Boolean findUserById(Long userId) {
+        return userRepository.existsById(userId);
     }
 
-    public User getUsersById(Long userId) {
-        return getUserStorage().getUser(userId);
+    @Transactional(readOnly = true)
+    public Optional<User> getUsersById(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundEntityException();
+        }
+        return userRepository.findById(userId);
     }
 
-    public User create(UserDto userDto) {
-        User user = dtoToUser(null, userDto);
-        getUserStorage().save(user);
+    public User saveUser(UserDto userDto) {
+        User user = mapToNewUser(userDto);
+        userRepository.save(user);
         return user;
     }
 
-    public User update(Long id, UserDto userDto) {
-        User user = dtoToUser(id, userDto);
-        getUserStorage().update(id, user);
-        return getUserStorage().getUser(id);
+    public User updateUser(Long id, UserDto userDto) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundEntityException();
+        }
+        User user = userRepository.findById(id).get();
+        return userRepository.save(new User(
+                id,
+                userDto.getName() != null ? userDto.getName() : user.getName(),
+                userDto.getEmail() != null ? userDto.getEmail() : user.getEmail()
+        ));
     }
 
-    public void delete(Long id) {
-        getUserStorage().delete(id);
+    public void delete(Long userId) {
+        userRepository.delete(userRepository.findById(userId).get());
     }
 }

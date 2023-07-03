@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.model.User;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/users")
@@ -32,7 +33,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUsersById(@PathVariable(required = false) @NotNull Long userId) {
+    public Optional<User> getUsersById(@PathVariable(required = false) @NotNull Long userId) {
         log.info("поулчен запрос GET /users/id");
         return userService.getUsersById(userId);
     }
@@ -41,13 +42,13 @@ public class UserController {
     @PostMapping()
     public User create(@RequestBody @Valid UserDto userDto) {
         log.info("поулчен запрос POST /users");
-        return userService.create(userDto);
+        return userService.saveUser(userDto);
     }
 
     @PatchMapping("/{userId}")
     public User update(@PathVariable @NotNull Long userId, @RequestBody UserDto userDto) {
         log.debug("поулчен запрос PATCH /users");
-        return userService.update(userId, userDto);
+        return userService.updateUser(userId, userDto);
     }
 
     @DeleteMapping("/{userId}")

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -26,15 +27,21 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Item> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("поулчен запрос GET /items");
         return itemService.getItemsByUserId(userId);
     }
 
     @GetMapping("/{itemId}")
-    public Item getItemById(@PathVariable(required = false) @NotNull Long itemId) {
+    public ItemDto getItemById(@PathVariable(required = false) @NotNull Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("поулчен запрос GET /items/id");
-        return itemService.getItemById(itemId);
+        return itemService.getItemDtoByItemId(itemId, userId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@PathVariable(required = false) @NotNull Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody @Valid CommentDto commentDto) {
+        log.info("поулчен запрос POST /items/id/comment");
+        return itemService.addComment(itemId, userId, commentDto);
     }
 
     @GetMapping("/search")
