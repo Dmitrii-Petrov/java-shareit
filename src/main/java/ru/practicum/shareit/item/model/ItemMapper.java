@@ -17,10 +17,11 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getOwner(),
-                item.getRequest(),
+                item.getRequestId(),
                 null,
                 null,
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
     }
 
@@ -30,7 +31,7 @@ public class ItemMapper {
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         item.setOwner(id);
-        item.setRequest(itemDto.getRequest());
+        item.setRequestId(itemDto.getRequestId());
         return item;
     }
 }
