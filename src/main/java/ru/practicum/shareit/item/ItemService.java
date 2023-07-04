@@ -1,6 +1,10 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -14,12 +18,14 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.storage.RequestRepository;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.practicum.shareit.item.model.CommentMapper.commentToDto;
 import static ru.practicum.shareit.item.model.CommentMapper.mapToNewComment;
@@ -38,20 +44,35 @@ public class ItemService {
 
     private final CommentRepository commentRepository;
 
+    private final RequestRepository requestRepository;
+
     @Transactional(readOnly = true)
-    public List<ItemDto> getItemsByUserId(Long userId) {
-        List<Item> list = itemRepository.findByOwnerOrderById(userId);
-        List<ItemDto> result = new ArrayList<>();
-        for (Item item : list) {
-            ItemDto itemDto = itemToDto(item);
-            if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
-                itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
-            }
-            if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
-                itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
-            }
-            result.add(itemDto);
+    public List<ItemDto> getItemsByUserId(Long userId, Integer from, Integer size) {
+        if (size == null) {
+            size = Integer.MAX_VALUE - from;
         }
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = PageRequest.of(0, size + from, sort);
+        AtomicInteger count = new AtomicInteger(0);
+        Page<Item> itemPage = itemRepository.findByOwnerOrderById(userId, page);
+
+        List<ItemDto> result = new ArrayList<>();
+
+        itemPage.getContent().forEach(item -> {
+            if (count.get() >= from) {
+                ItemDto itemDto = itemToDto(item);
+                if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                    itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
+                }
+                if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                    itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
+                }
+                result.add(itemDto);
+
+            }
+            count.set(count.get() + 1);
+
+        });
         return result;
     }
 
@@ -91,13 +112,18 @@ public class ItemService {
         return itemDto;
     }
 
-    public Item create(ItemDto itemDto, Long userId) {
+    public ItemDto create(ItemDto itemDto, Long userId) {
         if (!userService.findUserById(userId)) {
+            throw new NotFoundEntityException();
+        }
+        if ((itemDto.getRequestId() != null) && (!requestRepository.existsById(itemDto.getRequestId()))) {
             throw new NotFoundEntityException();
         }
         Item item = mapToNewItem(itemDto, userId);
         itemRepository.save(item);
-        return item;
+        ItemDto itemDto1 = itemToDto(itemRepository.save(item));
+        itemDto1.setRequestId(itemDto.getRequestId());
+        return itemDto1;
     }
 
     public Item update(Long id, ItemDto itemDto, Long userId) {
@@ -111,7 +137,7 @@ public class ItemService {
                 itemDto.getDescription() != null ? itemDto.getDescription() : item.getDescription(),
                 itemDto.getAvailable() != null ? itemDto.getAvailable() : item.getAvailable(),
                 userId,
-                itemDto.getRequest() != null ? itemDto.getRequest() : item.getRequest()
+                itemDto.getRequest() != null ? itemDto.getRequest() : item.getRequestId()
         ));
     }
 
@@ -120,17 +146,31 @@ public class ItemService {
     }
 
     @Transactional(readOnly = true)
-    public List<Item> getItemsByTextSearch(String text) {
-        List<Item> list = new ArrayList<>();
+    public List<Item> getItemsByTextSearch(String text, Integer from, Integer size) {
+        if (size == null) {
+            size = Integer.MAX_VALUE - from;
+        }
+        List<Item> result = new ArrayList<>();
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        Pageable page = PageRequest.of(0, size + from, sort);
+        AtomicInteger count = new AtomicInteger(0);
+        Page<Item> itemPage;
+
         if (text.isBlank()) {
-            return list;
+            return result;
         }
-        for (Item item : itemRepository.findAll()) {
-            if ((item.getAvailable()) && ((item.getDescription().toLowerCase().contains(text.toLowerCase())) || (item.getName().toLowerCase().contains(text.toLowerCase())))) {
-                list.add(item);
+        itemPage = itemRepository.findByAvailableAndDescriptionContainingIgnoreCaseOrAvailableAndNameContainingIgnoreCase(true, text, true, text, page);
+
+        itemPage.getContent().forEach(item -> {
+            if (count.get() >= from) {
+                result.add(item);
+
             }
-        }
-        return list;
+            count.set(count.get() + 1);
+
+        });
+
+        return result;
     }
 
     public CommentDto addComment(Long itemId, Long userId, CommentDto commentDto) {

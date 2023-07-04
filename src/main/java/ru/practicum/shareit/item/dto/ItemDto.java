@@ -38,4 +38,6 @@ public class ItemDto {
     private Booking nextBooking;
 
     private List<CommentDto> comments = new ArrayList<>();
+
+    private Long requestId;
 }
