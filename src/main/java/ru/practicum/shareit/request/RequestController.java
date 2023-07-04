@@ -38,7 +38,8 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
-    public RequestDto getRequestById(@PathVariable(required = false) @NotNull Long requestId, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public RequestDto getRequestById(@PathVariable(required = false) @NotNull Long requestId,
+                                     @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("поулчен запрос GET /requests/id");
         return requestService.getRequestById(requestId, userId);
     }
