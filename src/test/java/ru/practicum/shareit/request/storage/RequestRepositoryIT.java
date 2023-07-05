@@ -52,7 +52,6 @@ class RequestRepositoryIT {
 
         requestRepository.save(request);
 
-
         List<Request> requestList = requestRepository.findByRequesterIdOrderByCreated(userID + 1);
 
         assertTrue(requestList.isEmpty());
