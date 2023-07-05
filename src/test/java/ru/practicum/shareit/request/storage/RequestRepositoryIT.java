@@ -3,9 +3,6 @@ package ru.practicum.shareit.request.storage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.request.model.Request;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @DataJpaTest
 class RequestRepositoryIT {
 
@@ -31,7 +29,7 @@ class RequestRepositoryIT {
         long userID = user1.getId();
         LocalDateTime time = LocalDateTime.now();
 
-        Request request = new Request(null,"description",user1,time);
+        Request request = new Request(null, "description", user1, time);
 
         requestRepository.save(request);
 
@@ -50,12 +48,12 @@ class RequestRepositoryIT {
         long userID = user1.getId();
         LocalDateTime time = LocalDateTime.now();
 
-        Request request = new Request(null,"description",user1,time);
+        Request request = new Request(null, "description", user1, time);
 
         requestRepository.save(request);
 
 
-        List<Request> requestList = requestRepository.findByRequesterIdOrderByCreated(userID+1);
+        List<Request> requestList = requestRepository.findByRequesterIdOrderByCreated(userID + 1);
 
         assertTrue(requestList.isEmpty());
     }

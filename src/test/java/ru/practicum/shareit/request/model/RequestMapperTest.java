@@ -7,12 +7,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.model.UserMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.practicum.shareit.request.model.RequestMapper.mapToNewRequest;
 import static ru.practicum.shareit.request.model.RequestMapper.requestToDto;
 
@@ -25,7 +24,7 @@ class RequestMapperTest {
     void requestToDtoTest() {
         User user = new User();
         LocalDateTime time = LocalDateTime.now();
-        Request request = new Request(0L,"text",user,time);
+        Request request = new Request(0L, "text", user, time);
 
         RequestDto requestDto = requestToDto(request);
 
@@ -40,9 +39,9 @@ class RequestMapperTest {
         User user = new User();
         LocalDateTime time = LocalDateTime.now();
         Item item = new Item();
-        RequestDto requestDto = new RequestDto(0L,"text",user,time, List.of(item));
+        RequestDto requestDto = new RequestDto(0L, "text", user, time, List.of(item));
 
-        Request request = mapToNewRequest(requestDto,user);
+        Request request = mapToNewRequest(requestDto, user);
 
         assertEquals(requestDto.getDescription(), request.getDescription());
         assertEquals(requestDto.getRequestor(), request.getRequester());

@@ -43,7 +43,7 @@ class RequestControllerIT {
         LocalDateTime time = LocalDateTime.now();
         Item item = new Item();
         RequestDto requestDto = new RequestDto(0L, "description", user, time, List.of(item));
-        Request request = mapToNewRequest(requestDto,user);
+        Request request = mapToNewRequest(requestDto, user);
 
         when(requestService.create(requestDto, userId)).thenReturn(request);
 
@@ -69,7 +69,7 @@ class RequestControllerIT {
         LocalDateTime time = LocalDateTime.now();
         Item item = new Item();
         RequestDto requestDto = new RequestDto(0L, null, user, time, List.of(item));
-        Request request = mapToNewRequest(requestDto,user);
+        Request request = mapToNewRequest(requestDto, user);
 
         when(requestService.create(requestDto, userId)).thenReturn(request);
 
@@ -83,7 +83,6 @@ class RequestControllerIT {
         verify(requestService, never()).create(requestDto, userId);
 
     }
-
 
 
     @SneakyThrows

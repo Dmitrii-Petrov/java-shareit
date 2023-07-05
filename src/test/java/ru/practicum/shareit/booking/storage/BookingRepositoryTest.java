@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 class BookingRepositoryTest {
 

@@ -2,13 +2,10 @@ package ru.practicum.shareit.request.model;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Component
 @AllArgsConstructor
