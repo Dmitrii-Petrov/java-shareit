@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.practicum.shareit.booking.model.BookingMapper.mapToNewBooking;
@@ -36,24 +35,6 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ItemService itemService;
     private final UserService userService;
-
-    @Transactional(readOnly = true)
-    public List<Booking> getBookings() {
-        return bookingRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Boolean findBookingById(Long bookingId) {
-        return bookingRepository.existsById(bookingId);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Booking> getBookingsById(Long bookingsId) {
-        if (!bookingRepository.existsById(bookingsId)) {
-            throw new NotFoundEntityException();
-        }
-        return bookingRepository.findById(bookingsId);
-    }
 
     public Booking saveBooking(BookingDto bookingDto, Long id) {
         Item item = itemService.getItemById(bookingDto.getItemId());
@@ -69,8 +50,7 @@ public class BookingService {
         if (item.getOwner().equals(id)) {
             throw new NotFoundEntityException();
         }
-        bookingRepository.save(booking);
-        return booking;
+        return bookingRepository.save(booking);
     }
 
     @Transactional(readOnly = true)

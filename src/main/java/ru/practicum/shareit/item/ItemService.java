@@ -120,7 +120,6 @@ public class ItemService {
             throw new NotFoundEntityException();
         }
         Item item = mapToNewItem(itemDto, userId);
-        itemRepository.save(item);
         ItemDto itemDto1 = itemToDto(itemRepository.save(item));
         itemDto1.setRequestId(itemDto.getRequestId());
         return itemDto1;
@@ -139,10 +138,6 @@ public class ItemService {
                 userId,
                 itemDto.getRequest() != null ? itemDto.getRequest() : item.getRequestId()
         ));
-    }
-
-    public void delete(Long id) {
-        itemRepository.delete(itemRepository.findById(id).get());
     }
 
     @Transactional(readOnly = true)

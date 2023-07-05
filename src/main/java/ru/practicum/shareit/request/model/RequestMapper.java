@@ -2,7 +2,6 @@ package ru.practicum.shareit.request.model;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.model.User;
 

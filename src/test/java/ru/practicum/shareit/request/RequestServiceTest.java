@@ -137,8 +137,8 @@ class RequestServiceTest {
         assertThrows(NotFoundEntityException.class,
                 () -> requestService.getRequestById(requestId, userId));
 
-        verify(requestRepository,never()).findById(requestId);
-        verify(itemRepository,never()).findByRequestIdOrderById(requestId);
+        verify(requestRepository, never()).findById(requestId);
+        verify(itemRepository, never()).findByRequestIdOrderById(requestId);
     }
 
     @Test
@@ -162,13 +162,11 @@ class RequestServiceTest {
         when(userService.findUserById(userId)).thenReturn(false);
 
 
-
-
         assertThrows(NotFoundEntityException.class,
                 () -> requestService.getRequestById(requestId, userId));
 
-        verify(requestRepository,never()).findById(requestId);
-        verify(itemRepository,never()).findByRequestIdOrderById(requestId);
+        verify(requestRepository, never()).findById(requestId);
+        verify(itemRepository, never()).findByRequestIdOrderById(requestId);
     }
 
     @Test

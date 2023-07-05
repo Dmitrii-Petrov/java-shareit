@@ -142,7 +142,7 @@ class UserServiceTest {
         when(userRepository.existsById(userId)).thenReturn(false);
 
         assertThrows(NotFoundEntityException.class,
-                () -> userService.updateUser(userId,userDto));
+                () -> userService.updateUser(userId, userDto));
 
         verify(userRepository, never()).findById(userId);
     }

@@ -27,6 +27,7 @@ public class ItemMapper {
 
     public static Item mapToNewItem(ItemDto itemDto, Long id) {
         Item item = new Item();
+        item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
