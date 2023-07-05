@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exceptions.NotFoundEntityException;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static ru.practicum.shareit.user.model.UserMapper.userToDto;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -74,11 +76,8 @@ class UserServiceTest {
     @Test
     void getUsersById_whenUserNotFound_thenNotFoundEntityExceptionThrown() {
         long userId = 0L;
-        User user = new User(userId, "name", "mail@mail.com");
 
         when(userRepository.existsById(userId)).thenReturn(false);
-//        doThrow(NotFoundEntityException.class).when(userRepository.existsById(userId));
-
 
         assertThrows(NotFoundEntityException.class,
                 () -> userService.getUsersById(userId));
@@ -88,13 +87,41 @@ class UserServiceTest {
 
     @Test
     void saveUser() {
+        User user = new User(null, "name", "mail@mail.com");
+        UserDto userDto = userToDto(user);
+
+        when(userRepository.save(user)).thenReturn(user);
+
+        User response = userService.saveUser(userDto);
+
+        assertEquals(user, response);
+        verify(userRepository).save(user);
+
     }
 
     @Test
-    void updateUser() {
+    void updateUser_whenUserFound_thenReturnUpdatedUser() {
+        User user = new User(null, "name", "mail@mail.com");
+        UserDto userDto = userToDto(user);
+
+        when(userRepository.save(user)).thenReturn(user);
+
+        User response = userService.saveUser(userDto);
+
+        assertEquals(user, response);
+        verify(userRepository).save(user);
     }
 
     @Test
-    void delete() {
+    void updateUser_whenUserNotFound_thenNotFoundEntityExceptionThrown() {
+        long userId = 0L;
+
+        when(userRepository.existsById(userId)).thenReturn(false);
+
+        assertThrows(NotFoundEntityException.class,
+                () -> userService.getUsersById(userId));
+
+        verify(userRepository, never()).findById(userId);
+
     }
 }

@@ -48,7 +48,7 @@ public class RequestController {
     public List<RequestDto> getRequestAll(@RequestHeader("X-Sharer-User-Id") Long userId,
                                           @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
                                           @RequestParam(required = false, defaultValue = "1") @Min(1) Integer size) {
-        log.info("поулчен запрос GET /requests/id");
+        log.info("поулчен запрос GET /requests/all");
         return requestService.getRequestAll(userId, from, size);
     }
 
