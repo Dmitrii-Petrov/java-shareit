@@ -113,7 +113,62 @@ class RequestServiceTest {
         assertEquals(response, requestDto);
         verify(requestRepository).findById(requestId);
         verify(itemRepository).findByRequestIdOrderById(requestId);
+    }
 
+    @Test
+    void getRequestById_whenRequestNotFound_thenNotFoundEntityExceptionThrown() {
+        long userId = 0L;
+        User user = new User();
+        user.setId(userId);
+        Item item = new Item();
+        item.setOwner(userId);
+
+        List<Item> itemList = new ArrayList<>();
+        itemList.add(item);
+
+        long requestId = 1L;
+        Request request = new Request();
+        request.setRequester(user);
+        RequestDto requestDto = requestToDto(request);
+        requestDto.setItems(itemList);
+
+        when(requestRepository.existsById(requestId)).thenReturn(false);
+
+        assertThrows(NotFoundEntityException.class,
+                () -> requestService.getRequestById(requestId, userId));
+
+        verify(requestRepository,never()).findById(requestId);
+        verify(itemRepository,never()).findByRequestIdOrderById(requestId);
+    }
+
+    @Test
+    void getRequestById_whenUserNotFound_thenNotFoundEntityExceptionThrown() {
+        long userId = 0L;
+        User user = new User();
+        user.setId(userId);
+        Item item = new Item();
+        item.setOwner(userId);
+
+        List<Item> itemList = new ArrayList<>();
+        itemList.add(item);
+
+        long requestId = 1L;
+        Request request = new Request();
+        request.setRequester(user);
+        RequestDto requestDto = requestToDto(request);
+        requestDto.setItems(itemList);
+
+        when(requestRepository.existsById(requestId)).thenReturn(true);
+        when(userService.findUserById(userId)).thenReturn(false);
+
+
+
+
+        assertThrows(NotFoundEntityException.class,
+                () -> requestService.getRequestById(requestId, userId));
+
+        verify(requestRepository,never()).findById(requestId);
+        verify(itemRepository,never()).findByRequestIdOrderById(requestId);
     }
 
     @Test
@@ -174,6 +229,38 @@ class RequestServiceTest {
 
         assertTrue(response.isEmpty());
         verify(userService).findUserById(userId);
+        verify(requestRepository).findAll((Pageable) Mockito.any());
+    }
+
+    @Test
+    void getRequestAll_whenFromIsTooHigh_thenReturnEmptyList() {
+        long userId = 0L;
+        User user = new User();
+        user.setId(userId);
+        Item item = new Item();
+        item.setOwner(userId);
+
+        List<Item> itemList = new ArrayList<>();
+        itemList.add(item);
+
+        Request request = new Request();
+        request.setRequester(user);
+        RequestDto requestDto = requestToDto(request);
+        requestDto.setItems(itemList);
+        LocalDateTime created = LocalDateTime.now();
+        requestDto.setCreated(created);
+        request.setCreated(created);
+
+        List<Request> requestList = List.of(request);
+        Page<Request> requestPage = new PageImpl<>(requestList);
+
+        when(userService.findUserById(userId + 1)).thenReturn(true);
+        when(requestRepository.findAll((Pageable) Mockito.any())).thenReturn(requestPage);
+
+        List<RequestDto> response = requestService.getRequestAll(userId + 1, 1, 10);
+
+        assertTrue(response.isEmpty());
+        verify(userService).findUserById(userId + 1);
         verify(requestRepository).findAll((Pageable) Mockito.any());
     }
 

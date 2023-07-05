@@ -81,8 +81,9 @@ public class RequestService {
                     RequestDto requestDto = requestToDto(request);
                     requestDto.setItems(itemRepository.findByRequestIdOrderById(request.getId()));
                     result.add(requestDto);
-                    count.set(count.get() + 1);
+
                 }
+                count.set(count.get() + 1);
             }
         });
         return result;

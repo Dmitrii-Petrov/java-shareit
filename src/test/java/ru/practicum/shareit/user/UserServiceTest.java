@@ -101,12 +101,33 @@ class UserServiceTest {
 
     @Test
     void updateUser_whenUserFound_thenReturnUpdatedUser() {
-        User user = new User(null, "name", "mail@mail.com");
+        long userId = 0L;
+        User user = new User(userId, "name", "mail@mail.com");
         UserDto userDto = userToDto(user);
 
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
 
-        User response = userService.saveUser(userDto);
+        User response = userService.updateUser(userId, userDto);
+
+        assertEquals(user, response);
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateUser_whenUserDtoNameAndEmailNulls_thenReturnUpdatedUser() {
+        long userId = 0L;
+        User user = new User(userId, "name", "mail@mail.com");
+        UserDto userDto = userToDto(user);
+        userDto.setName(null);
+        userDto.setEmail(null);
+
+        when(userRepository.existsById(userId)).thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+
+        User response = userService.updateUser(userId, userDto);
 
         assertEquals(user, response);
         verify(userRepository).save(user);
@@ -115,13 +136,28 @@ class UserServiceTest {
     @Test
     void updateUser_whenUserNotFound_thenNotFoundEntityExceptionThrown() {
         long userId = 0L;
+        User user = new User(null, "name", "mail@mail.com");
+        UserDto userDto = userToDto(user);
 
         when(userRepository.existsById(userId)).thenReturn(false);
 
         assertThrows(NotFoundEntityException.class,
-                () -> userService.getUsersById(userId));
+                () -> userService.updateUser(userId,userDto));
 
         verify(userRepository, never()).findById(userId);
+    }
+
+
+    @Test
+    void delete() {
+        long userId = 0L;
+        User user = new User(userId, "name", "mail@mail.com");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        userService.delete(userId);
+
+        verify(userRepository).findById(userId);
+        verify(userRepository).delete(user);
 
     }
 }
