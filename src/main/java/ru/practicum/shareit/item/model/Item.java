@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+
 @Table(name = "items", schema = "public")
 public class Item {
     @Id
@@ -22,8 +23,10 @@ public class Item {
     private String description;
 
     private Boolean available;
+
+
     @Column(name = "owner_id")
     private Long owner;
     @Column(name = "request_id")
-    private Long request;
+    private Long requestId;
 }

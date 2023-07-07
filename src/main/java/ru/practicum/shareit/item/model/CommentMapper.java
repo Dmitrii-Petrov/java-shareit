@@ -25,7 +25,11 @@ public class CommentMapper {
     public static Comment mapToNewComment(CommentDto commentDto, User user, Item itemId) {
         Comment comment = new Comment();
         comment.setText(commentDto.getText());
-        comment.setCreated(LocalDateTime.now());
+        if (commentDto.getCreated() != null) {
+            comment.setCreated(commentDto.getCreated());
+        } else {
+            comment.setCreated(LocalDateTime.now());
+        }
         comment.setItem(itemId);
         comment.setAuthor(user);
         return comment;

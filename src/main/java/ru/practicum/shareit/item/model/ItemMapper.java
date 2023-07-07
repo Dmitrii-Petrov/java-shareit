@@ -17,20 +17,22 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getOwner(),
-                item.getRequest(),
+                item.getRequestId(),
                 null,
                 null,
-                new ArrayList<>()
+                new ArrayList<>(),
+                null
         );
     }
 
     public static Item mapToNewItem(ItemDto itemDto, Long id) {
         Item item = new Item();
+        item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         item.setOwner(id);
-        item.setRequest(itemDto.getRequest());
+        item.setRequestId(itemDto.getRequestId());
         return item;
     }
 }
