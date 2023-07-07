@@ -111,7 +111,7 @@ class ItemServiceTest {
         int from = 2;
         LocalDateTime time = LocalDateTime.now();
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        Pageable page = PageRequest.of(0, size + from, sort);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Item item = new Item();
         item.setId(itemId);
         item.setName("name");
@@ -577,7 +577,7 @@ class ItemServiceTest {
         item.setOwner(userId);
         item.setDescription("text");
 
-        List<Item> itemList = List.of(item);
+        List<Item> itemList = List.of();
         Page<Item> requestPage = new PageImpl<>(itemList);
 
         when(itemRepository.findByAvailableAndDescriptionContainingIgnoreCaseOrAvailableAndNameContainingIgnoreCase(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(requestPage);

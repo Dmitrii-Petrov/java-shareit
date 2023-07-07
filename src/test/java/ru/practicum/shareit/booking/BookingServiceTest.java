@@ -358,7 +358,7 @@ class BookingServiceTest {
         LocalDateTime time1 = time.plusDays(1);
 
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
+        Pageable page = PageRequest.of(from / size, size, sort);
 
         Item item = new Item();
         item.setId(itemId);
@@ -760,7 +760,7 @@ class BookingServiceTest {
         LocalDateTime time1 = time.plusDays(1);
 
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
+        Pageable page = PageRequest.of(from / size, size, sort);
 
         Item item = new Item();
         item.setId(itemId);

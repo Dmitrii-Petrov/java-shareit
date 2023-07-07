@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.practicum.shareit.request.model.RequestMapper.mapToNewRequest;
 import static ru.practicum.shareit.request.model.RequestMapper.requestToDto;
@@ -72,21 +71,19 @@ public class RequestService {
         }
         List<RequestDto> result = new ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.ASC, "created");
-        Pageable page = PageRequest.of(0, size + from, sort);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Page<Request> requestPage = requestRepository.findAll(page);
-        AtomicInteger count = new AtomicInteger(0);
+
         requestPage.getContent().forEach(request -> {
             if (!request.getRequester().getId().equals(userId)) {
-                if (count.get() >= from) {
-                    RequestDto requestDto = requestToDto(request);
-                    requestDto.setItems(itemRepository.findByRequestIdOrderById(request.getId()));
-                    result.add(requestDto);
-
-                }
-                count.set(count.get() + 1);
+                RequestDto requestDto = requestToDto(request);
+                requestDto.setItems(itemRepository.findByRequestIdOrderById(request.getId()));
+                result.add(requestDto);
             }
         });
-        return result;
 
+        if (result.size() > from % size) {
+            return result.subList(from % size, result.size());
+        } else return new ArrayList<>();
     }
 }

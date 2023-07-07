@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.practicum.shareit.booking.model.BookingMapper.mapToNewBooking;
 
@@ -71,12 +70,10 @@ public class BookingService {
             throw new NotFoundEntityException();
         }
         if (size == null) {
-            size = Integer.MAX_VALUE - from;
+            size = Integer.MAX_VALUE;
         }
-        List<Booking> result = new ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
-        AtomicInteger count = new AtomicInteger(0);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Page<Booking> bookingPage;
 
         switch (state) {
@@ -108,14 +105,12 @@ public class BookingService {
                 throw new UnknownStateException("Unknown state: UNSUPPORTED_STATUS");
         }
 
-        bookingPage.getContent().forEach(booking -> {
-            if (count.get() >= from) {
-                result.add(booking);
 
-            }
-            count.set(count.get() + 1);
+        List<Booking> result = new ArrayList<>(bookingPage.getContent());
+        if (result.size() > from % size) {
+            result = result.subList(from % size, result.size());
+        } else result.clear();
 
-        });
         return result;
     }
 
@@ -125,12 +120,10 @@ public class BookingService {
             throw new NotFoundEntityException();
         }
         if (size == null) {
-            size = Integer.MAX_VALUE - from;
+            size = Integer.MAX_VALUE;
         }
-        List<Booking> result = new ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
-        AtomicInteger count = new AtomicInteger(0);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Page<Booking> bookingPage;
 
         switch (state) {
@@ -162,14 +155,12 @@ public class BookingService {
                 throw new UnknownStateException("Unknown state: UNSUPPORTED_STATUS");
         }
 
-        bookingPage.getContent().forEach(booking -> {
-            if (count.get() >= from) {
-                result.add(booking);
+        List<Booking> result = new ArrayList<>(bookingPage.getContent());
+        if (result.size() > from % size) {
+            result = result.subList(from % size, result.size());
+        } else result.clear();
 
-            }
-            count.set(count.get() + 1);
 
-        });
         return result;
     }
 

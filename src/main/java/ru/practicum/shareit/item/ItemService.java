@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.practicum.shareit.item.model.CommentMapper.commentToDto;
 import static ru.practicum.shareit.item.model.CommentMapper.mapToNewComment;
@@ -49,31 +48,28 @@ public class ItemService {
     @Transactional(readOnly = true)
     public List<ItemDto> getItemsByUserId(Long userId, Integer from, Integer size) {
         if (size == null) {
-            size = Integer.MAX_VALUE - from;
+            size = Integer.MAX_VALUE;
         }
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        Pageable page = PageRequest.of(0, size + from, sort);
-        AtomicInteger count = new AtomicInteger(0);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Page<Item> itemPage = itemRepository.findByOwnerOrderById(userId, page);
 
         List<ItemDto> result = new ArrayList<>();
 
         itemPage.getContent().forEach(item -> {
-            if (count.get() >= from) {
-                ItemDto itemDto = itemToDto(item);
-                if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
-                    itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
-                }
-                if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
-                    itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
-                }
-                result.add(itemDto);
-
+            ItemDto itemDto = itemToDto(item);
+            if (!bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setNextBooking(bookingRepository.findByItemIdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
             }
-            count.set(count.get() + 1);
-
+            if (!bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).isEmpty()) {
+                itemDto.setLastBooking(bookingRepository.findByItemIdAndStartBeforeAndStatusOrderByEndDesc(item.getId(), LocalDateTime.now(), Status.APPROVED).get(0));
+            }
+            result.add(itemDto);
         });
-        return result;
+
+        if (result.size() > from % size) {
+            return result.subList(from % size, result.size());
+        } else return new ArrayList<>();
     }
 
     @Transactional(readOnly = true)
@@ -143,12 +139,11 @@ public class ItemService {
     @Transactional(readOnly = true)
     public List<Item> getItemsByTextSearch(String text, Integer from, Integer size) {
         if (size == null) {
-            size = Integer.MAX_VALUE - from;
+            size = Integer.MAX_VALUE;
         }
         List<Item> result = new ArrayList<>();
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        Pageable page = PageRequest.of(0, size + from, sort);
-        AtomicInteger count = new AtomicInteger(0);
+        Pageable page = PageRequest.of(from / size, size, sort);
         Page<Item> itemPage;
 
         if (text.isBlank()) {
@@ -156,14 +151,11 @@ public class ItemService {
         }
         itemPage = itemRepository.findByAvailableAndDescriptionContainingIgnoreCaseOrAvailableAndNameContainingIgnoreCase(true, text, true, text, page);
 
-        itemPage.getContent().forEach(item -> {
-            if (count.get() >= from) {
-                result.add(item);
+        result.addAll(itemPage.getContent());
 
-            }
-            count.set(count.get() + 1);
-
-        });
+        if (result.size() > from % size) {
+            result = result.subList(from % size, result.size());
+        } else result.clear();
 
         return result;
     }
