@@ -20,9 +20,10 @@ public class ItemDto {
     private long id;
 
     @NotBlank
+    @Size(max = 100, message = "максимальная длина описания - 100 символов")
     private String name;
 
-    @Size(max = 200, message = "максимальная длина описания - 200 символов")
+    @Size(max = 500, message = "максимальная длина описания - 500 символов")
     @NotBlank
     private String description;
 
