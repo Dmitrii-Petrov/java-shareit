@@ -36,6 +36,7 @@
 	</modules>
 
 	<build>
+		<testSourceDirectory>${project.basedir}/server/src/test</testSourceDirectory>
 		<pluginManagement>
 			<plugins>
 				<plugin>
