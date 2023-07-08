@@ -22,13 +22,13 @@ public class BookingClient extends BaseClient {
         super(builder.uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX)).requestFactory(HttpComponentsClientHttpRequestFactory::new).build());
     }
 
-    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
+    public ResponseEntity<Object> getBookings(long userId, String state, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of("state", state, "from", from, "size", size);
         return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
-    public ResponseEntity<Object> getBookingsByOwner(long userId, BookingState state, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of("state", state.name(), "from", from, "size", size);
+    public ResponseEntity<Object> getBookingsByOwner(long userId, String state, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of("state", state, "from", from, "size", size);
         return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
 

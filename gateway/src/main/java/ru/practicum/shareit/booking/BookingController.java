@@ -7,10 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
-import ru.practicum.shareit.booking.dto.BookingState;
-import ru.practicum.shareit.exceptions.UnknownStateException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Controller
@@ -45,22 +44,18 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                              @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
-                                              @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
+                                              @PositiveOrZero @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
+                                              @Positive @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.getBookings(userId, state, from, size);
+        return bookingClient.getBookings(userId, stateParam, from, size);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                     @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
-                                                     @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
-        BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
+                                                     @PositiveOrZero @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
+                                                     @Positive @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
         log.info("Get bookings/owner with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.getBookingsByOwner(userId, state, from, size);
+        return bookingClient.getBookingsByOwner(userId, stateParam, from, size);
     }
 }
