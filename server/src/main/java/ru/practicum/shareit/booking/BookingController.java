@@ -5,12 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -46,10 +48,11 @@ public class BookingController {
     @GetMapping()
     public List<Booking> getBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                      @RequestParam(required = false, defaultValue = "ALL") String state,
-                                     @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
-                                     @RequestParam(required = false) @Min(1) Integer size) {
+                                     @RequestParam(required = false, defaultValue = "0") Integer from,
+                                     @RequestParam(required = false) Integer size) {
         log.info("поулчен запрос GET /bookings");
-        return bookingService.getBookings(userId, state, from, size);
+        Optional<BookingState> stateParam = BookingState.from(state);
+        return bookingService.getBookings(userId, stateParam.get(), from, size);
     }
 
     @GetMapping("/owner")
@@ -58,6 +61,7 @@ public class BookingController {
                                             @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
                                             @RequestParam(required = false) @Min(1) Integer size) {
         log.info("поулчен запрос GET /bookings/owner");
-        return bookingService.getBookingsByOwner(userId, state, from, size);
+        Optional<BookingState> stateParam = BookingState.from(state);
+        return bookingService.getBookingsByOwner(userId, stateParam.get(), from, size);
     }
 }

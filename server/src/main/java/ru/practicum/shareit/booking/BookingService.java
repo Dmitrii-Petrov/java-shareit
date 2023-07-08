@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
@@ -65,7 +66,7 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<Booking> getBookings(Long userId, String state, Integer from, Integer size) {
+    public List<Booking> getBookings(Long userId, BookingState state, Integer from, Integer size) {
         if (!itemService.findUserById(userId)) {
             throw new NotFoundEntityException();
         }
@@ -77,27 +78,27 @@ public class BookingService {
         Page<Booking> bookingPage;
 
         switch (state) {
-            case "ALL": {
+            case ALL: {
                 bookingPage = bookingRepository.findByBookerIdOrderByIdDesc(userId, page);
                 break;
             }
-            case "CURRENT": {
+            case CURRENT: {
                 bookingPage = bookingRepository.findByBookerIdAndEndAfterAndStartBeforeOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), page);
                 break;
             }
-            case "PAST": {
+            case PAST: {
                 bookingPage = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), page);
                 break;
             }
-            case "FUTURE": {
+            case FUTURE: {
                 bookingPage = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), page);
                 break;
             }
-            case "WAITING": {
+            case WAITING: {
                 bookingPage = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, page);
                 break;
             }
-            case "REJECTED": {
+            case REJECTED: {
                 bookingPage = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, page);
                 break;
             }
@@ -115,7 +116,7 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<Booking> getBookingsByOwner(Long userId, String state, Integer from, Integer size) {
+    public List<Booking> getBookingsByOwner(Long userId, BookingState state, Integer from, Integer size) {
         if (!itemService.findUserById(userId)) {
             throw new NotFoundEntityException();
         }
@@ -127,27 +128,27 @@ public class BookingService {
         Page<Booking> bookingPage;
 
         switch (state) {
-            case "ALL": {
+            case ALL: {
                 bookingPage = bookingRepository.findByItemOwnerOrderByIdDesc(userId, page);
                 break;
             }
-            case "CURRENT": {
+            case CURRENT: {
                 bookingPage = bookingRepository.findByItemOwnerAndEndAfterAndStartBeforeOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now(), page);
                 break;
             }
-            case "PAST": {
+            case PAST: {
                 bookingPage = bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(), page);
                 break;
             }
-            case "FUTURE": {
+            case FUTURE: {
                 bookingPage = bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(), page);
                 break;
             }
-            case "WAITING": {
+            case WAITING: {
                 bookingPage = bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, Status.WAITING, page);
                 break;
             }
-            case "REJECTED": {
+            case REJECTED: {
                 bookingPage = bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, Status.REJECTED, page);
                 break;
             }

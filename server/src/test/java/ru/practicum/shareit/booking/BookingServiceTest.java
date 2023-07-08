@@ -8,11 +8,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.storage.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundEntityException;
-import ru.practicum.shareit.exceptions.UnknownStateException;
 import ru.practicum.shareit.exceptions.WrongEntityException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
@@ -335,7 +335,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdOrderByIdDesc(userId, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.ALL, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -376,7 +376,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdOrderByIdDesc(userId, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.ALL, from, size);
 
         assertTrue(response.isEmpty());
     }
@@ -414,7 +414,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdOrderByIdDesc(Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.ALL, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -455,7 +455,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdAndEndAfterAndStartBeforeOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "CURRENT", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.CURRENT, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -496,7 +496,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "PAST", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.PAST, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -537,7 +537,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "FUTURE", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.FUTURE, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -578,7 +578,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "WAITING", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.WAITING, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -619,49 +619,12 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookings(userId, "REJECTED", from, size);
+        List<Booking> response = bookingService.getBookings(userId, BookingState.REJECTED, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
     }
 
-    @Test
-    void testGetBookings_UnsupportedState_thenUnknownStateExceptionThrown() {
-        long userId = 0L;
-        long userId1 = 1L;
-        long itemId = 0L;
-        int size = 10;
-        int from = 0;
-        User user = new User();
-        user.setId(userId);
-
-        User user1 = new User();
-        user1.setId(userId1);
-
-        LocalDateTime time = LocalDateTime.now();
-        LocalDateTime time1 = time.plusDays(1);
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
-
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName("name");
-        item.setOwner(userId);
-        item.setAvailable(true);
-
-        Booking booking = new Booking();
-        booking.setBookerId(userId);
-        Booking booking1 = new Booking();
-        booking1.setBookerId(userId);
-
-        Page<Booking> bookingPage = new PageImpl<>(List.of(booking, booking1));
-
-        when(itemService.findUserById(userId)).thenReturn(true);
-
-        assertThrows(UnknownStateException.class,
-                () -> bookingService.getBookings(userId, "test", from, size));
-    }
 
     @Test
     void testGetBookings_UserNotFound_thenNotFoundEntityExceptionThrown() {
@@ -698,7 +661,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(false);
 
         assertThrows(NotFoundEntityException.class,
-                () -> bookingService.getBookings(userId, "test", from, size));
+                () -> bookingService.getBookings(userId, null, from, size));
     }
 
 
@@ -737,7 +700,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerOrderByIdDesc(userId, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.ALL, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -778,7 +741,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerOrderByIdDesc(userId, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.ALL, from, size);
 
         assertTrue(response.isEmpty());
     }
@@ -816,7 +779,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerOrderByIdDesc(Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "ALL", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.ALL, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -857,7 +820,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerAndEndAfterAndStartBeforeOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "CURRENT", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.CURRENT, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -898,7 +861,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "PAST", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.PAST, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -939,7 +902,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "FUTURE", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.FUTURE, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -980,7 +943,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, Status.WAITING, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "WAITING", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.WAITING, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
@@ -1021,49 +984,12 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(true);
         when(bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, Status.REJECTED, page)).thenReturn(bookingPage);
 
-        List<Booking> response = bookingService.getBookingsByOwner(userId, "REJECTED", from, size);
+        List<Booking> response = bookingService.getBookingsByOwner(userId, BookingState.REJECTED, from, size);
 
         assertEquals(booking, response.get(0));
         assertEquals(booking1, response.get(1));
     }
 
-    @Test
-    void testGetBookingsByOwner_UnsupportedState_thenUnknownStateExceptionThrown() {
-        long userId = 0L;
-        long userId1 = 1L;
-        long itemId = 0L;
-        int size = 10;
-        int from = 0;
-        User user = new User();
-        user.setId(userId);
-
-        User user1 = new User();
-        user1.setId(userId1);
-
-        LocalDateTime time = LocalDateTime.now();
-        LocalDateTime time1 = time.plusDays(1);
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = PageRequest.of(0, size + from, sort);
-
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName("name");
-        item.setOwner(userId);
-        item.setAvailable(true);
-
-        Booking booking = new Booking();
-        booking.setBookerId(userId);
-        Booking booking1 = new Booking();
-        booking1.setBookerId(userId);
-
-        Page<Booking> bookingPage = new PageImpl<>(List.of(booking, booking1));
-
-        when(itemService.findUserById(userId)).thenReturn(true);
-
-        assertThrows(UnknownStateException.class,
-                () -> bookingService.getBookingsByOwner(userId, "test", from, size));
-    }
 
     @Test
     void testGetBookingsByOwner_UserNotFound_thenNotFoundEntityExceptionThrown() {
@@ -1100,7 +1026,7 @@ class BookingServiceTest {
         when(itemService.findUserById(userId)).thenReturn(false);
 
         assertThrows(NotFoundEntityException.class,
-                () -> bookingService.getBookingsByOwner(userId, "test", from, size));
+                () -> bookingService.getBookingsByOwner(userId, null, from, size));
     }
 
     @Test
