@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,14 +31,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public Optional<User> getUsersById(@PathVariable(required = false) @NotNull Long userId) {
+    public Optional<User> getUsersById(@PathVariable(required = false) Long userId) {
         log.info("поулчен запрос GET /users/id");
         return userService.getUsersById(userId);
     }
 
 
     @PostMapping()
-    public User create(@RequestBody @Valid UserDto userDto) {
+    public User create(@RequestBody UserDto userDto) {
         log.info("поулчен запрос POST /users");
         return userService.saveUser(userDto);
     }
@@ -52,7 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void delete(@PathVariable @NotNull Long userId) {
+    public void delete(@PathVariable Long userId) {
         log.debug("поулчен запрос DELETE /users");
         userService.delete(userId);
     }

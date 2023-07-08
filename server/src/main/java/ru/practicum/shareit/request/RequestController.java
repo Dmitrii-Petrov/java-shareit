@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.model.Request;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -26,7 +23,7 @@ public class RequestController {
     }
 
     @PostMapping()
-    public Request create(@RequestBody @Valid RequestDto requestDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public Request create(@RequestBody RequestDto requestDto, @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("поулчен запрос POST /requests");
         return requestService.create(requestDto, userId);
     }
@@ -38,7 +35,7 @@ public class RequestController {
     }
 
     @GetMapping("/{requestId}")
-    public RequestDto getRequestById(@PathVariable(required = false) @NotNull Long requestId,
+    public RequestDto getRequestById(@PathVariable(required = false) Long requestId,
                                      @RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("поулчен запрос GET /requests/id");
         return requestService.getRequestById(requestId, userId);
@@ -46,8 +43,8 @@ public class RequestController {
 
     @GetMapping("/all")
     public List<RequestDto> getRequestAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @RequestParam(required = false, defaultValue = "0") @Min(0) Integer from,
-                                          @RequestParam(required = false, defaultValue = "1") @Min(1) Integer size) {
+                                          @RequestParam(required = false, defaultValue = "0") Integer from,
+                                          @RequestParam(required = false, defaultValue = "1") Integer size) {
         log.info("поулчен запрос GET /requests/all");
         return requestService.getRequestAll(userId, from, size);
     }
