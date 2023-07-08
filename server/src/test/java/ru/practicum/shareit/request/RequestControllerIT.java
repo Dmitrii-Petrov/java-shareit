@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,29 +60,6 @@ class RequestControllerIT {
 
         verify(requestService).create(requestDto, userId);
         assertEquals(objectMapper.writeValueAsString(request), result);
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenDtoNotValid_thenReturnedBadRequest() {
-        long userId = 0L;
-        User user = new User();
-        LocalDateTime time = LocalDateTime.now();
-        Item item = new Item();
-        RequestDto requestDto = new RequestDto(0L, null, user, time, List.of(item));
-        Request request = mapToNewRequest(requestDto, user);
-
-        when(requestService.create(requestDto, userId)).thenReturn(request);
-
-
-        mvc.perform(post("/requests")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .header("X-Sharer-User-Id", userId))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).create(requestDto, userId);
-
     }
 
 

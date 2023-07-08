@@ -2,8 +2,8 @@ package ru.practicum.shareit.request.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -20,9 +20,9 @@ public class RequestDto {
     @NotBlank
     private String description;
 
-    private User requestor;
+    private UserDto requestor;
 
     private LocalDateTime created;
 
-    private List<Item> items;
+    private List<ItemDto> items;
 }

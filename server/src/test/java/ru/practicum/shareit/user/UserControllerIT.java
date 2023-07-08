@@ -12,7 +12,8 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.practicum.shareit.user.model.UserMapper.mapToNewUser;
@@ -68,24 +69,6 @@ class UserControllerIT {
 
         verify(userService).saveUser(userDto);
         assertEquals(objectMapper.writeValueAsString(user), result);
-    }
-
-    @SneakyThrows
-    @Test
-    void create_whenUserDtoIsNotValid_thenReturnedBadRequest() {
-
-        UserDto userDto = new UserDto(0L, "name", "mail@mail.com");
-
-        userDto.setName(null);
-        User user = mapToNewUser(userDto);
-        when(userService.saveUser(userDto)).thenReturn(user);
-
-        mvc.perform(post("/users", userDto)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).saveUser(userDto);
     }
 
 
