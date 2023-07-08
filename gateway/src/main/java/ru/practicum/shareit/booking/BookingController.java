@@ -14,7 +14,8 @@ import ru.practicum.shareit.exceptions.UnknownStateException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.Optional;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -50,12 +51,11 @@ public class BookingController {
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                               @PositiveOrZero @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
                                               @Positive @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
-        Optional<BookingState> state = BookingState.from(stateParam);
-        if (state.isEmpty()) return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new UnknownStateException("Unknown state: " + stateParam));
+        BookingState state = BookingState.from(stateParam)
+                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
+
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.getBookings(userId, state.get(), from, size);
+        return bookingClient.getBookings(userId, state, from, size);
     }
 
     @GetMapping("/owner")
@@ -63,11 +63,21 @@ public class BookingController {
                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                                      @PositiveOrZero @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
                                                      @Positive @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
-        Optional<BookingState> state = BookingState.from(stateParam);
-        if (state.isEmpty()) return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new UnknownStateException("Unknown state: " + stateParam));
+        BookingState state = BookingState.from(stateParam)
+                .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
         log.info("Get bookings/owner with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
-        return bookingClient.getBookingsByOwner(userId, stateParam, from, size);
+        return bookingClient.getBookingsByOwner(userId, state, from, size);
+    }
+
+    @ExceptionHandler(value = {UnknownStateException.class})
+    public ResponseEntity<Object> handleUnknownStateException(final UnknownStateException ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        response.put("status", HttpStatus.BAD_REQUEST.name());
+        response.put("error", ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 }
