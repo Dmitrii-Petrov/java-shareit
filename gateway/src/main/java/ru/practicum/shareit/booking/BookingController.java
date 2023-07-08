@@ -11,7 +11,6 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.exceptions.UnknownStateException;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Controller
@@ -46,8 +45,8 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
                                               @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                              @RequestParam(required = false, name = "from", defaultValue = "0") @PositiveOrZero Integer from,
-                                              @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+                                              @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
+                                              @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
         log.info("Get booking with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
@@ -57,8 +56,8 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
-                                                     @RequestParam(required = false, name = "from", defaultValue = "0") @PositiveOrZero Integer from,
-                                                     @RequestParam(required = false, name = "size", defaultValue = "10") @Positive Integer size) {
+                                                     @RequestParam(required = false, name = "from", defaultValue = "0") Integer from,
+                                                     @RequestParam(required = false, name = "size", defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new UnknownStateException("Unknown state: " + stateParam));
         log.info("Get bookings/owner with state {}, userId={}, from={}, size={}", stateParam, userId, from, size);
